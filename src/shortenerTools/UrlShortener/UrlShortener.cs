@@ -20,19 +20,19 @@ Output:
     }
 */
 
-using System;
-using System.Threading.Tasks;
+using Cloud5mins.domain;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.Extensions.Logging;
-using System.Net;
-using Cloud5mins.domain;
 using Microsoft.Extensions.Configuration;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using System;
 using System.IO;
+using System.Net;
+using System.Security.Claims;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace Cloud5mins.Function
 {
@@ -62,7 +62,7 @@ namespace Cloud5mins.Function
                 }
                 else
                 {
-                    userId = principal.FindFirst(ClaimTypes.GivenName).Value;
+                    userId = principal.FindFirst(ClaimTypes.GivenName)?.Value;
                     log.LogInformation("Authenticated user {user}.", userId);
                 }
 
@@ -75,7 +75,7 @@ namespace Cloud5mins.Function
                 using (var reader = new StreamReader(req.Body))
                 {
                     var strBody = reader.ReadToEnd();
-                    input = JsonSerializer.Deserialize<ShortRequest>(strBody, new JsonSerializerOptions {PropertyNameCaseInsensitive = true});
+                    input = JsonSerializer.Deserialize<ShortRequest>(strBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                     if (input == null)
                     {
                         return new BadRequestObjectResult(new { StatusCode = HttpStatusCode.NotFound });
@@ -119,7 +119,7 @@ namespace Cloud5mins.Function
                     newRow = new ShortUrlEntity(longUrl, vanity, title, input.Schedules);
                     if (await stgHelper.IfShortUrlEntityExist(newRow))
                     {
-                        return new ConflictObjectResult(new{ Message = "This Short URL already exist."});
+                        return new ConflictObjectResult(new { Message = "This Short URL already exist." });
                     }
                 }
                 else
@@ -129,7 +129,7 @@ namespace Cloud5mins.Function
 
                 await stgHelper.SaveShortUrlEntity(newRow);
 
-                var host = string.IsNullOrEmpty(config["customDomain"]) ? req.Host.Host: config["customDomain"].ToString();
+                var host = string.IsNullOrEmpty(config["customDomain"]) ? req.Host.Host : config["customDomain"].ToString();
                 result = new ShortResponse(host, newRow.Url, newRow.RowKey, newRow.Title);
 
                 log.LogInformation("Short Url created.");
@@ -140,7 +140,7 @@ namespace Cloud5mins.Function
                 return new BadRequestObjectResult(new
                 {
                     message = ex.Message,
-                    StatusCode =  HttpStatusCode.BadRequest
+                    StatusCode = HttpStatusCode.BadRequest
                 });
             }
 

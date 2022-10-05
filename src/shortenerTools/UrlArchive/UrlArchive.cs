@@ -25,19 +25,19 @@ Output:
 
 */
 
-using System;
-using System.Threading.Tasks;
+using Cloud5mins.domain;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.Extensions.Logging;
-using System.Net;
-using Cloud5mins.domain;
 using Microsoft.Extensions.Configuration;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using System;
 using System.IO;
+using System.Net;
+using System.Security.Claims;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace Cloud5mins.Function
 {
@@ -64,7 +64,7 @@ namespace Cloud5mins.Function
                 }
                 else
                 {
-                    userId = principal.FindFirst(ClaimTypes.GivenName).Value;
+                    userId = principal.FindFirst(ClaimTypes.GivenName)?.Value;
                     log.LogInformation("Authenticated user {user}.", userId);
                 }
 
@@ -77,7 +77,7 @@ namespace Cloud5mins.Function
                 using (var reader = new StreamReader(req.Body))
                 {
                     var body = reader.ReadToEnd();
-                    input = JsonSerializer.Deserialize<ShortUrlEntity>(body, new JsonSerializerOptions {PropertyNameCaseInsensitive = true});
+                    input = JsonSerializer.Deserialize<ShortUrlEntity>(body, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                     if (input == null)
                     {
                         return new BadRequestObjectResult(new { StatusCode = HttpStatusCode.NotFound });
@@ -97,11 +97,12 @@ namespace Cloud5mins.Function
             catch (Exception ex)
             {
                 log.LogError(ex, "An unexpected error was encountered.");
-                return new BadRequestObjectResult(new {
-                                                        message = ex.Message,
-                                                        StatusCode = HttpStatusCode.BadRequest
-                                                    });
-                }
+                return new BadRequestObjectResult(new
+                {
+                    message = ex.Message,
+                    StatusCode = HttpStatusCode.BadRequest
+                });
+            }
 
             return new OkObjectResult(result);
         }

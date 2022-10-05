@@ -28,20 +28,19 @@ Output:
     }
 */
 
-using System;
-using System.Threading.Tasks;
+using Cloud5mins.domain;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.Extensions.Logging;
-using System.Net;
-using System.Net.Http;
-using Cloud5mins.domain;
 using Microsoft.Extensions.Configuration;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using System;
 using System.IO;
+using System.Net;
+using System.Security.Claims;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace Cloud5mins.Function
 {
@@ -70,7 +69,7 @@ namespace Cloud5mins.Function
                 }
                 else
                 {
-                    userId = principal.FindFirst(ClaimTypes.GivenName).Value;
+                    userId = principal.FindFirst(ClaimTypes.GivenName)?.Value;
                     log.LogInformation("Authenticated user {user}.", userId);
                 }
 
@@ -115,7 +114,7 @@ namespace Cloud5mins.Function
                 StorageTableHelper stgHelper = new StorageTableHelper(config["UlsDataStorage"]);
 
                 result = await stgHelper.UpdateShortUrlEntity(input);
-                var host = string.IsNullOrEmpty(config["customDomain"]) ? req.Host.Host: config["customDomain"].ToString();
+                var host = string.IsNullOrEmpty(config["customDomain"]) ? req.Host.Host : config["customDomain"].ToString();
                 result.ShortUrl = Utility.GetShortUrl(host, result.RowKey);
 
             }

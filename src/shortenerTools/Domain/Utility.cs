@@ -1,9 +1,9 @@
-using System.Linq;
-using System.Security.Cryptography;
-using System.Threading.Tasks;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System.Linq;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Threading.Tasks;
 
 namespace Cloud5mins.domain
 {
@@ -23,7 +23,7 @@ namespace Cloud5mins.domain
                 string getCode() => Encode(newKey);
                 if (await stgHelper.IfShortUrlEntityExistByVanity(getCode()))
                     return await GetValidEndUrl(vanity, stgHelper);
-              
+
                 return string.Join(string.Empty, getCode());
             }
             else
@@ -82,15 +82,15 @@ namespace Cloud5mins.domain
                 return new UnauthorizedResult();
             }
 
-            if (principal.FindFirst(ClaimTypes.GivenName) is null)
-            {
-                log.LogError("Claim not Found");
-                return new BadRequestObjectResult(new
-                {
-                    message = "Claim not Found",
-                    StatusCode = System.Net.HttpStatusCode.BadRequest
-                });
-            }
+            //if (principal.FindFirst(ClaimTypes.GivenName) is null)
+            //{
+            //    log.LogError("Claim not Found");
+            //    return new BadRequestObjectResult(new
+            //    {
+            //        message = "Claim not Found",
+            //        StatusCode = System.Net.HttpStatusCode.BadRequest
+            //    });
+            //}
             return null;
         }
     }

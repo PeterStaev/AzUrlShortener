@@ -15,18 +15,18 @@ Output:
     }
 */
 
-using System;
-using System.Threading.Tasks;
+using Cloud5mins.domain;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.Extensions.Logging;
-using System.Net;
-using Cloud5mins.domain;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Linq;
+using System.Net;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
+using System.Threading.Tasks;
 
 namespace Cloud5mins.Function
 {
@@ -60,13 +60,13 @@ namespace Cloud5mins.Function
                 }
                 else
                 {
-                   userId = principal.FindFirst(ClaimTypes.GivenName).Value;
-                   log.LogInformation("Authenticated user {user}.", userId);
+                    userId = principal.FindFirst(ClaimTypes.GivenName)?.Value;
+                    log.LogInformation("Authenticated user {user}.", userId);
                 }
 
                 result.UrlList = await stgHelper.GetAllShortUrlEntities();
                 result.UrlList = result.UrlList.Where(p => !(p.IsArchived ?? false)).ToList();
-                var host = string.IsNullOrEmpty(config["customDomain"]) ? req.Host.Host: config["customDomain"].ToString();
+                var host = string.IsNullOrEmpty(config["customDomain"]) ? req.Host.Host : config["customDomain"].ToString();
                 foreach (ShortUrlEntity url in result.UrlList)
                 {
                     url.ShortUrl = Utility.GetShortUrl(host, url.RowKey);
@@ -78,7 +78,7 @@ namespace Cloud5mins.Function
                 return new BadRequestObjectResult(new
                 {
                     message = ex.Message,
-                    StatusCode =  HttpStatusCode.BadRequest
+                    StatusCode = HttpStatusCode.BadRequest
                 });
             }
 
